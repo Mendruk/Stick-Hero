@@ -4,12 +4,12 @@ namespace Stick_Hero
 {
     public partial class MainForm : Form
     {
-        private const int GameFieldWidth = 800;
-        private const int GameFieldHeight = 600;
+        private const int GameFieldWidth = 700;
+        private const int GameFieldHeight = 900;
 
         private Game game;
 
-        private readonly LinearGradientBrush gradientBrush = new LinearGradientBrush(
+        private readonly LinearGradientBrush gradientBrush = new (
             new Point(0, 0),
             new Point(0, GameFieldHeight),
             Color.FromArgb(255, 100, 100, 255), 
