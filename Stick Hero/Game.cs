@@ -21,8 +21,11 @@ public class Game
     private int bridgeSize;
 
     private int targetPlatformX;
-    private Rectangle targetPlatform;
     private int targetPlatformWidth;
+    private Rectangle targetPlatform;
+
+    private int bonusZoneX;
+    private int bonusZoneWidth;
 
     private GameStates gameState = GameStates.Idle;
 
@@ -71,6 +74,7 @@ public class Game
 
         graphics.FillRectangle(Brushes.Black, startPlatform);
         graphics.FillRectangle(Brushes.Black, targetPlatform);
+        graphics.FillRectangle(Brushes.Red, bonusZoneX, startPlatformY, bonusZoneWidth, startPlatformHeight);
 
         hero.Draw(graphics);
         bridge.Draw(graphics);
@@ -127,6 +131,9 @@ public class Game
         targetPlatformX = random.Next(startPlatformX + startPlatformWidth, bridgeMaxSize);
         targetPlatformWidth = random.Next(25, 150); //todo
 
+        bonusZoneWidth = targetPlatformWidth / 3;
+        bonusZoneX = targetPlatformX + bonusZoneWidth;
+
         return targetPlatform = new Rectangle(
             targetPlatformX, startPlatformY,
             targetPlatformWidth, startPlatformHeight);
@@ -138,13 +145,22 @@ public class Game
                bridgeSize <= targetPlatformX + targetPlatformWidth - bridgeX;
     }
 
+    private bool AreBonusConditionMet()
+    {
+        return bridgeSize >= bonusZoneX - bridgeX &&
+               bridgeSize <= bonusZoneX + bonusZoneWidth - bridgeX;
+    }
+
     private void Hero_ReachedToEnd(object? sender, EventArgs e)
     {
         if (AreVictoryConditionMet())
         {
-            Score++;
-            Start();
+            if (AreBonusConditionMet())
+                Score += 2;
+            else 
+                Score++;
 
+            Start();
         }
         else
         {
