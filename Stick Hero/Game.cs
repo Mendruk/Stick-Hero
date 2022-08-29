@@ -26,8 +26,22 @@ public class Game
 
     private GameStates gameState = GameStates.Idle;
 
+    private readonly int width;
+    private readonly int height;
+
+    private static readonly FontStyle CellFontStyle = FontStyle.Bold;
+    private static readonly Font scoreFont = new(FontFamily.GenericMonospace, 50, CellFontStyle);
+    private static readonly StringFormat Format = new();
+
+    private int Score;
+
     public Game(int width, int height)
     {
+        Format.Alignment = StringAlignment.Center;
+
+        this.width = width;
+        this.height = height;
+
         heroStartPositionX = 50;
         heroStartPositionY = width - 100;
 
@@ -53,11 +67,14 @@ public class Game
 
     public void Draw(Graphics graphics)
     {
+        graphics.DrawString(Score.ToString(), scoreFont, Brushes.White, width / 2 - 25, height / 8); //align text to the center of the window
+
         graphics.FillRectangle(Brushes.Black, startPlatform);
         graphics.FillRectangle(Brushes.Black, targetPlatform);
 
         hero.Draw(graphics);
         bridge.Draw(graphics);
+
     }
 
     public void Start()
@@ -124,9 +141,16 @@ public class Game
     private void Hero_ReachedToEnd(object? sender, EventArgs e)
     {
         if (AreVictoryConditionMet())
+        {
+            Score++;
             Start();
+
+        }
         else
+        {
+            Score = 0;
             gameState = GameStates.HeroAndBridgeFall;
+        }
     }
 
     private void Bridge_BridgeWentDown(object? sender, BridgeEventArgs e)
