@@ -14,8 +14,8 @@ public class Game
     private readonly int startPlatformWidth;
     private readonly Rectangle startPlatform;
 
-    private readonly int bridgeX;
-    private readonly int bridgeY;
+    private readonly int bridgePivotX;
+    private readonly int bridgePivotY;
     private readonly int bridgeMaxSize;
     private readonly Bridge bridge;
     private int bridgeSize;
@@ -29,48 +29,50 @@ public class Game
 
     private GameStates gameState = GameStates.Idle;
 
-    private readonly int width;
-    private readonly int height;
+    private readonly int scoreX;
+    private readonly int scoreY;
+    private int score;
 
     private static readonly FontStyle CellFontStyle = FontStyle.Bold;
     private static readonly Font scoreFont = new(FontFamily.GenericMonospace, 50, CellFontStyle);
     private static readonly StringFormat Format = new();
 
-    private int Score;
 
     public Game(int width, int height)
     {
         Format.Alignment = StringAlignment.Center;
 
-        this.width = width;
-        this.height = height;
-
-        heroStartPositionX = 50;
+        heroStartPositionX = 0;
         heroStartPositionY = width - 100;
 
-        bridgeX = 150;
-        bridgeY = width;
-        bridgeMaxSize = width - 150;
+        bridgePivotX = 150;
+        bridgePivotY = width;
+        bridgeMaxSize = width - 200;
 
         startPlatformX = 0;
         startPlatformY = width;
         startPlatformWidth = 150;
         startPlatformHeight = height - width;
 
+        scoreX = width / 2 - 25;
+        scoreY = height / 8;
+
         hero = new Hero(heroStartPositionX, heroStartPositionY);
-        bridge = new Bridge(bridgeX, bridgeY, bridgeMaxSize);
+        bridge = new Bridge(bridgePivotX, bridgePivotY, bridgeMaxSize);
         startPlatform = new Rectangle(startPlatformX, startPlatformY, startPlatformWidth, startPlatformHeight);
 
-        bridge.BridgeWentDown += Bridge_BridgeWentDown;
-        bridge.BridgeWentFall += Bridge_BridgeWentFall;
-        hero.ReachedToEnd += Hero_ReachedToEnd;
+        // todo: rename
+        bridge.BridgeLengthAchievedMax += OnBridgeLengthAchievedMax;
+        bridge.RightEndOfBridgeAchievedTargetPlatform += OnRightEndOfBridgeAchievedTargetPlatform;
+        bridge.RightEndOfBridgeAchievedDown += OnRightEndOfBridgeAchievedDown;
+        hero.HeroAchievedEndOfBridge += OnHeroAchievedEndOfBridge;
 
-        Start();
+        Restart();
     }
 
     public void Draw(Graphics graphics)
     {
-        graphics.DrawString(Score.ToString(), scoreFont, Brushes.White, width / 2 - 25, height / 8); //align text to the center of the window
+        graphics.DrawString(score.ToString(), scoreFont, Brushes.White, scoreX, scoreY); //align text to the center of the window
 
         graphics.FillRectangle(Brushes.Black, startPlatform);
         graphics.FillRectangle(Brushes.Black, targetPlatform);
@@ -81,37 +83,30 @@ public class Game
 
     }
 
-    public void Start()
-    {
-        targetPlatform = GetRandomTargetPlatform();
-        hero.MoveToPosition(heroStartPositionX, heroStartPositionY);
-        bridge.MoveToPosition(bridgeX, bridgeY);
-
-        gameState = GameStates.Idle;
-    }
-
-    public void Update()
+    public bool TryUpdate()
     {
         switch (gameState)
         {
             case GameStates.Idle:
-                break;
+                return false;
             case GameStates.BridgeIncreases:
-                bridge.IncreaseSize();
+                bridge.IncreaseLengthOnStepToMaximum();
                 break;
             case GameStates.BridgeGoingDown:
-                bridge.Rotate();
+                bridge.DoRotationStepToTargetPlatform();
                 break;
             case GameStates.HeroWalkToEnd:
-                hero.MoveToEndOfBridge(bridgeSize);
+                hero.DoStepToEndOfBridge(bridgeSize);
                 break;
             case GameStates.HeroAndBridgeFall:
-                bridge.Fall();
-                hero.Fall();
+                hero.DoStepFallDown();
+                bridge.DoStepToRightEndFallDown();
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
+
+        return true;
     }
 
     public void StartIncreasingBridge()
@@ -125,11 +120,20 @@ public class Game
         if (gameState == GameStates.BridgeIncreases)
             gameState = GameStates.BridgeGoingDown;
     }
-
-    private Rectangle GetRandomTargetPlatform()
+    private void Restart()
     {
-        targetPlatformX = random.Next(startPlatformX + startPlatformWidth, bridgeMaxSize);
-        targetPlatformWidth = random.Next(25, 150); //todo
+        gameState = GameStates.Idle;
+
+        targetPlatform = GetRandomTargetPlatformWithBonusZone();
+
+        bridge.ResetRotationAndPosition(bridgePivotX, bridgePivotY);
+        hero.ReturnToPosition(heroStartPositionX, heroStartPositionY);
+    }
+
+    private Rectangle GetRandomTargetPlatformWithBonusZone()
+    {
+        targetPlatformX = random.Next(startPlatformX + startPlatformWidth + 50, bridgeMaxSize);
+        targetPlatformWidth = random.Next(70, 120);
 
         bonusZoneWidth = targetPlatformWidth / 3;
         bonusZoneX = targetPlatformX + bonusZoneWidth;
@@ -139,53 +143,50 @@ public class Game
             targetPlatformWidth, startPlatformHeight);
     }
 
+    //TODO:Try eliminate duplication
     private bool AreVictoryConditionMet()
     {
-        return bridgeSize >= targetPlatformX - bridgeX &&
-               bridgeSize <= targetPlatformX + targetPlatformWidth - bridgeX;
+        return bridgeSize >= targetPlatformX - bridgePivotX &&
+               bridgeSize <= targetPlatformX + targetPlatformWidth - bridgePivotX;
     }
 
     private bool AreBonusConditionMet()
     {
-        return bridgeSize >= bonusZoneX - bridgeX &&
-               bridgeSize <= bonusZoneX + bonusZoneWidth - bridgeX;
+        return bridgeSize >= bonusZoneX - bridgePivotX &&
+               bridgeSize <= bonusZoneX + bonusZoneWidth - bridgePivotX;
     }
+    //
 
-    private void Hero_ReachedToEnd(object? sender, EventArgs e)
+    private void OnHeroAchievedEndOfBridge(object? sender, EventArgs e)
     {
         if (AreVictoryConditionMet())
         {
             if (AreBonusConditionMet())
-                Score += 2;
-            else 
-                Score++;
+                score += 2;
+            else
+                score++;
 
-            Start();
+            Restart();
         }
         else
         {
-            Score = 0;
+            score = 0;
             gameState = GameStates.HeroAndBridgeFall;
         }
     }
+    private void OnBridgeLengthAchievedMax(object? sender, BridgeEventArgs e)
+    {
+        StartRotateBridge();
+    }
 
-    private void Bridge_BridgeWentDown(object? sender, BridgeEventArgs e)
+    private void OnRightEndOfBridgeAchievedTargetPlatform(object? sender, BridgeEventArgs e)
     {
         gameState = GameStates.HeroWalkToEnd;
         bridgeSize = e.Size;
     }
 
-    private void Bridge_BridgeWentFall(object? sender, EventArgs e)
+    private void OnRightEndOfBridgeAchievedDown(object? sender, EventArgs e)
     {
-        Start();
+        Restart();
     }
-}
-
-internal enum GameStates
-{
-    Idle,
-    BridgeIncreases,
-    BridgeGoingDown,
-    HeroWalkToEnd,
-    HeroAndBridgeFall
 }

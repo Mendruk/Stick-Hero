@@ -27,14 +27,18 @@ public partial class MainForm : Form
 
     private void MainForm_KeyDown(object sender, KeyEventArgs e)
     {
-        game.StartIncreasingBridge();
-        pictureGameField.Refresh();
+        if (e.KeyCode == Keys.Space)
+        {
+            game.StartIncreasingBridge();
+        }
     }
 
     private void MainForm_KeyUp(object sender, KeyEventArgs e)
     {
-        game.StartRotateBridge();
-        pictureGameField.Refresh();
+        if (e.KeyCode == Keys.Space)
+        {
+            game.StartRotateBridge();
+        }
     }
 
     private void pictureGameField_Paint(object sender, PaintEventArgs e)
@@ -46,8 +50,10 @@ public partial class MainForm : Form
 
     private void timer_Tick(object sender, EventArgs e)
     {
-        game.Update();
-        Refresh();
+        if(game.TryUpdate())
+            pictureGameField.Refresh();
+
+        //Invalidate specific areas near which changes have occurred will complicate the code.
     }
 
 }
