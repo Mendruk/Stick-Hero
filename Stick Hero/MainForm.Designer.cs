@@ -41,7 +41,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.pictureGameField.Location = new System.Drawing.Point(0, 0);
             this.pictureGameField.Name = "pictureGameField";
-            this.pictureGameField.Size = new System.Drawing.Size(778, 552);
+            this.pictureGameField.Size = new System.Drawing.Size(680, 900);
             this.pictureGameField.TabIndex = 0;
             this.pictureGameField.TabStop = false;
             this.pictureGameField.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureGameField_Paint);
@@ -56,7 +56,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(778, 549);
+            this.ClientSize = new System.Drawing.Size(678, 849);
             this.Controls.Add(this.pictureGameField);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.MaximizeBox = false;

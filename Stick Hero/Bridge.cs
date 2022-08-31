@@ -2,10 +2,10 @@
 
 public class Bridge
 {
-    private readonly Pen pen = new(Brushes.DarkBlue, 15);
-    private readonly int rotationStep = 5;//90 % rotationStep = 0!
+    private readonly Pen pen = new(Brushes.DarkBlue, 10);
+    private readonly int rotationStep = 2;//90 % rotationStep = 0!
     private readonly int increaseStep = 10;
- 
+
     private double angle = -90;
 
     private readonly int maxLength;
@@ -41,7 +41,6 @@ public class Bridge
         angle = -90;
     }
 
-    //TODO: Try eliminate duplication
     public void IncreaseLengthOnStepToMaximum()
     {
         if (length < maxLength)
@@ -50,12 +49,12 @@ public class Bridge
             BridgeLengthAchievedMax(this, new BridgeEventArgs(length));
     }
 
-    public void DoRotationStepToTargetPlatform()//todo:rename
+    public void DoRotationStepToTargetPlatform()
     {
         if (angle < 0)
             angle += rotationStep;
         else
-            RightEndOfBridgeAchievedTargetPlatform(this, new BridgeEventArgs(length)); //todo
+            RightEndOfBridgeAchievedTargetPlatform(this, new BridgeEventArgs(length));
     }
 
     public void DoStepToRightEndFallDown()
@@ -65,5 +64,4 @@ public class Bridge
         else
             RightEndOfBridgeAchievedDown(this, EventArgs.Empty);
     }
-    //
 }

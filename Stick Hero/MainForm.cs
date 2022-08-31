@@ -19,10 +19,10 @@ public partial class MainForm : Form
     {
         InitializeComponent();
 
-        Width = GameFieldWidth;
-        Height = GameFieldHeight;
+        Width = GameFieldWidth + 20;//+ 20 from outside the form
+        Height = GameFieldHeight + 20;
 
-        game = new Game(Width, Height);
+        game = new Game(GameFieldWidth, GameFieldHeight);
     }
 
     private void MainForm_KeyDown(object sender, KeyEventArgs e)
@@ -50,7 +50,7 @@ public partial class MainForm : Form
 
     private void timer_Tick(object sender, EventArgs e)
     {
-        if(game.TryUpdate())
+        if (game.TryUpdate())
             pictureGameField.Refresh();
 
         //Invalidate specific areas near which changes have occurred will complicate the code.

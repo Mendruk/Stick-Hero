@@ -2,10 +2,15 @@
 
 public class Game
 {
+    private static readonly FontStyle CellFontStyle = FontStyle.Bold;
+    private static readonly Font scoreFont = new(FontFamily.GenericMonospace, 50, CellFontStyle);
+    private static readonly StringFormat Format = new();
+
     private readonly Random random = new();
 
     private readonly int heroStartPositionX;
     private readonly int heroStartPositionY;
+    private readonly int heroSize;
     private readonly Hero hero;
 
     private readonly int startPlatformX;
@@ -31,37 +36,32 @@ public class Game
 
     private readonly int scoreX;
     private readonly int scoreY;
-    private int score;
-
-    private static readonly FontStyle CellFontStyle = FontStyle.Bold;
-    private static readonly Font scoreFont = new(FontFamily.GenericMonospace, 50, CellFontStyle);
-    private static readonly StringFormat Format = new();
-
+    public int Score { get; private set; }
 
     public Game(int width, int height)
     {
         Format.Alignment = StringAlignment.Center;
 
+        heroSize = width / 7;
         heroStartPositionX = 0;
-        heroStartPositionY = width - 100;
-
-        bridgePivotX = 150;
-        bridgePivotY = width;
-        bridgeMaxSize = width - 200;
+        heroStartPositionY = width - heroSize;
 
         startPlatformX = 0;
         startPlatformY = width;
-        startPlatformWidth = 150;
+        startPlatformWidth = heroSize;
         startPlatformHeight = height - width;
 
-        scoreX = width / 2 - 25;
+        bridgePivotX = heroSize;
+        bridgePivotY = width;
+        bridgeMaxSize = width - heroSize;
+
+        scoreX = width / 2;
         scoreY = height / 8;
 
-        hero = new Hero(heroStartPositionX, heroStartPositionY);
+        hero = new Hero(heroStartPositionX, heroStartPositionY, heroSize);
         bridge = new Bridge(bridgePivotX, bridgePivotY, bridgeMaxSize);
         startPlatform = new Rectangle(startPlatformX, startPlatformY, startPlatformWidth, startPlatformHeight);
 
-        // todo: rename
         bridge.BridgeLengthAchievedMax += OnBridgeLengthAchievedMax;
         bridge.RightEndOfBridgeAchievedTargetPlatform += OnRightEndOfBridgeAchievedTargetPlatform;
         bridge.RightEndOfBridgeAchievedDown += OnRightEndOfBridgeAchievedDown;
@@ -72,7 +72,7 @@ public class Game
 
     public void Draw(Graphics graphics)
     {
-        graphics.DrawString(score.ToString(), scoreFont, Brushes.White, scoreX, scoreY); //align text to the center of the window
+        graphics.DrawString(Score.ToString(), scoreFont, Brushes.White, scoreX, scoreY, Format); //align text to the center of the window
 
         graphics.FillRectangle(Brushes.Black, startPlatform);
         graphics.FillRectangle(Brushes.Black, targetPlatform);
@@ -80,7 +80,6 @@ public class Game
 
         hero.Draw(graphics);
         bridge.Draw(graphics);
-
     }
 
     public bool TryUpdate()
@@ -132,8 +131,8 @@ public class Game
 
     private Rectangle GetRandomTargetPlatformWithBonusZone()
     {
-        targetPlatformX = random.Next(startPlatformX + startPlatformWidth + 50, bridgeMaxSize);
-        targetPlatformWidth = random.Next(70, 120);
+        targetPlatformX = random.Next(startPlatformX + startPlatformWidth + heroSize, bridgeMaxSize - heroSize);
+        targetPlatformWidth = random.Next(heroSize / 2, heroSize * 2);
 
         bonusZoneWidth = targetPlatformWidth / 3;
         bonusZoneX = targetPlatformX + bonusZoneWidth;
@@ -143,7 +142,6 @@ public class Game
             targetPlatformWidth, startPlatformHeight);
     }
 
-    //TODO:Try eliminate duplication
     private bool AreVictoryConditionMet()
     {
         return bridgeSize >= targetPlatformX - bridgePivotX &&
@@ -155,22 +153,21 @@ public class Game
         return bridgeSize >= bonusZoneX - bridgePivotX &&
                bridgeSize <= bonusZoneX + bonusZoneWidth - bridgePivotX;
     }
-    //
 
     private void OnHeroAchievedEndOfBridge(object? sender, EventArgs e)
     {
         if (AreVictoryConditionMet())
         {
             if (AreBonusConditionMet())
-                score += 2;
+                Score += 2;
             else
-                score++;
+                Score++;
 
             Restart();
         }
         else
         {
-            score = 0;
+            Score = 0;
             gameState = GameStates.HeroAndBridgeFall;
         }
     }
