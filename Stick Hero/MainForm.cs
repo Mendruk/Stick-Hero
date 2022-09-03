@@ -19,7 +19,7 @@ public partial class MainForm : Form
     {
         InitializeComponent();
 
-        Width = GameFieldWidth + 20;//+ 20 from outside the form
+        Width = GameFieldWidth + 20;
         Height = GameFieldHeight + 20;
 
         game = new Game(GameFieldWidth, GameFieldHeight);
@@ -51,9 +51,10 @@ public partial class MainForm : Form
     private void timer_Tick(object sender, EventArgs e)
     {
         if (game.TryUpdate())
+            //Invalidate specific areas near which changes have occurred will complicate the code.
             pictureGameField.Refresh();
 
-        //Invalidate specific areas near which changes have occurred will complicate the code.
+        
     }
 
 }

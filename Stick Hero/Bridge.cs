@@ -3,65 +3,65 @@
 public class Bridge
 {
     private readonly Pen pen = new(Brushes.DarkBlue, 10);
-    private readonly int rotationStep = 2;//90 % rotationStep = 0!
+    private readonly int rotationStep = 2;
     private readonly int increaseStep = 10;
 
-    private double angle = -90;
+    public readonly int MaxLength;
+    //pivot coordinate
+    public readonly int X;
+    public readonly int Y;
 
-    private readonly int maxLength;
-
-    private int length;
-
-    private int x;
-    private int y;
+    public int Length;
+    public int Angle = -90;
 
     public Bridge(int x, int y, int maxLength)
     {
-        this.x = x;
-        this.y = y;
-        this.maxLength = maxLength;
+        this.X = x;
+        this.Y = y;
+        MaxLength = maxLength;
     }
-
-    public event EventHandler<BridgeEventArgs> BridgeLengthAchievedMax = delegate { };
-    public event EventHandler<BridgeEventArgs> RightEndOfBridgeAchievedTargetPlatform = delegate { };
-    public event EventHandler RightEndOfBridgeAchievedDown = delegate { };
 
     public void Draw(Graphics graphics)
     {
-        graphics.DrawLine(pen, x, y,
-            (int)(x + Math.Cos(angle * Math.PI / 180) * length),
-            (int)(y + Math.Sin(angle * Math.PI / 180) * length));
+        graphics.DrawLine(pen, X, Y,
+            (int)(X + Math.Cos(Angle * Math.PI / 180) * Length),
+            (int)(Y + Math.Sin(Angle * Math.PI / 180) * Length));
     }
 
-    public void ResetRotationAndPosition(int x, int y)
+    public bool TryIncreaseLength()
     {
-        this.x = x;
-        this.y = y;
-        length = 0;
-        angle = -90;
+        int increasedLength = Length + increaseStep;
+
+        if (increasedLength < MaxLength)
+        {
+            Length = increasedLength;
+            return true;
+        }
+
+        return false;
     }
 
-    public void IncreaseLengthOnStepToMaximum()
+    public bool TryRotateClockwiseToTargetPlatform()
     {
-        if (length < maxLength)
-            length += increaseStep;
-        else
-            BridgeLengthAchievedMax(this, new BridgeEventArgs(length));
+        int increasedAngle = (int)Angle + rotationStep;
+
+        if (increasedAngle <= 0)
+        {
+            Angle = increasedAngle;
+            return true;
+        }
+        return false;
     }
 
-    public void DoRotationStepToTargetPlatform()
+    public bool TryRotateClockwiseToDown()
     {
-        if (angle < 0)
-            angle += rotationStep;
-        else
-            RightEndOfBridgeAchievedTargetPlatform(this, new BridgeEventArgs(length));
-    }
+        int increasedAngle = (int)Angle + rotationStep;
 
-    public void DoStepToRightEndFallDown()
-    {
-        if (angle < 90)
-            angle += rotationStep;
-        else
-            RightEndOfBridgeAchievedDown(this, EventArgs.Empty);
+        if (increasedAngle <= 90)
+        {
+            Angle = increasedAngle;
+            return true;
+        }
+        return false;
     }
 }

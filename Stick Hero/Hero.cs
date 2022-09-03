@@ -2,43 +2,40 @@
 
 public class Hero
 {
-    private const int StepSize = 10;
-    private readonly int size;
     private readonly Bitmap heroSprite = Resource.Hero;
+    private const int StepSize = 10;
 
-    private int x;
-    private int y;
+    public readonly int StartX;
+    public readonly int StartY;
+    public int X;
+    public int Y;
+    public int Size;
 
     public Hero(int x, int y, int heroSize)
     {
-        this.x = x;
-        this.y = y;
-        size = heroSize;
+        X = StartX = x;
+        Y = StartY = y;
+        Size = heroSize;
     }
-
-    public event EventHandler HeroAchievedEndOfBridge = delegate { };
 
     public void Draw(Graphics graphics)
     {
-        graphics.DrawImage(heroSprite, x, y, size, size);
+        graphics.DrawImage(heroSprite, X, Y, Size, Size);
     }
 
-    public void ReturnToPosition(int x, int y)
+    public bool TryDoStepToEndOfBridge(int bridgeLength)
     {
-        this.x = x;
-        this.y = y;
-    }
+        if (X < bridgeLength)
+        {
+            X += StepSize;
+            return true;
+        }
 
-    public void DoStepToEndOfBridge(int bridgeLength)
-    {
-        if (x < bridgeLength)
-            x += StepSize;
-        else
-            HeroAchievedEndOfBridge(this, EventArgs.Empty);
+        return false;
     }
 
     public void DoStepFallDown()
     {
-        y += StepSize;
+        Y += StepSize;
     }
 }
