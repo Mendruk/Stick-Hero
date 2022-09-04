@@ -23,15 +23,9 @@ public class Hero
         graphics.DrawImage(heroSprite, X, Y, Size, Size);
     }
 
-    public bool TryDoStepToEndOfBridge(int bridgeLength)
+    public void DoStepToEndOfBridge()
     {
-        if (X < bridgeLength)
-        {
-            X += StepSize;
-            return true;
-        }
-
-        return false;
+        X += StepSize;
     }
 
     public void DoStepFallDown()

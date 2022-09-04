@@ -37,7 +37,7 @@ public partial class MainForm : Form
     {
         if (e.KeyCode == Keys.Space)
         {
-            game.StartRotateBridge();
+            game.StopIncreasingBridge();
         }
     }
 
@@ -50,7 +50,9 @@ public partial class MainForm : Form
 
     private void timer_Tick(object sender, EventArgs e)
     {
-        if (game.TryUpdate())
+        game.Update(out bool isGameStateIdle);
+
+        if(!isGameStateIdle)
             //Invalidate specific areas near which changes have occurred will complicate the code.
             pictureGameField.Refresh();
 

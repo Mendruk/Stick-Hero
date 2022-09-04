@@ -3,10 +3,13 @@
 public class Bridge
 {
     private readonly Pen pen = new(Brushes.DarkBlue, 10);
+
+    // 90 % rotationStep = 0;
     private readonly int rotationStep = 2;
     private readonly int increaseStep = 10;
 
     public readonly int MaxLength;
+
     //pivot coordinate
     public readonly int X;
     public readonly int Y;
@@ -16,8 +19,8 @@ public class Bridge
 
     public Bridge(int x, int y, int maxLength)
     {
-        this.X = x;
-        this.Y = y;
+        X = x;
+        Y = y;
         MaxLength = maxLength;
     }
 
@@ -28,40 +31,37 @@ public class Bridge
             (int)(Y + Math.Sin(Angle * Math.PI / 180) * Length));
     }
 
-    public bool TryIncreaseLength()
+    public void IncreaseLength()
     {
-        int increasedLength = Length + increaseStep;
+        Length += increaseStep;
+    }
 
-        if (increasedLength < MaxLength)
-        {
-            Length = increasedLength;
+    public void RotateClockwise()
+    {
+        Angle += rotationStep;
+    }
+
+    public bool IsLengthAchivedMaximum()
+    {
+        if (Length >= MaxLength)
             return true;
-        }
 
         return false;
     }
 
-    public bool TryRotateClockwiseToTargetPlatform()
+    public bool IsStandHorizontal()
     {
-        int increasedAngle = (int)Angle + rotationStep;
-
-        if (increasedAngle <= 0)
-        {
-            Angle = increasedAngle;
+        if (Angle == 0)
             return true;
-        }
+
         return false;
     }
 
-    public bool TryRotateClockwiseToDown()
+    public bool IsStandVertical()
     {
-        int increasedAngle = (int)Angle + rotationStep;
-
-        if (increasedAngle <= 90)
-        {
-            Angle = increasedAngle;
+        if (Angle == 90)
             return true;
-        }
+
         return false;
     }
 }

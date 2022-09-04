@@ -1,6 +1,6 @@
 ﻿namespace Stick_Hero;
 
-public enum GameStates
+public enum GameState
 {
     Idle,
     BridgeIncreases,
